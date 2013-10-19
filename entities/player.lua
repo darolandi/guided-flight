@@ -14,7 +14,7 @@ player.height = 40
 player.health = INIT_HEALTH
 
 player.pathing = false
-player.imageName = "player_smiley"
+player.imageNameAlive = "player_smiley"
 
 --[[
 	args:
@@ -31,7 +31,21 @@ function player:load(args)
 	player.type = args.type
 	player.special = args.special or nil
 
-	player.image = ImageManager.getImage(self.imageName)
+	player.image = ImageManager.getImage(self.imageNameAlive)
+end
+
+function player:heal(amount)
+	self.health = self.health + amount
+	if self.health >= INIT_HEALTH then
+		self.health = INIT_HEALTH
+	end
+end
+
+function player:damage(amount)
+	self.health = self.health - amount
+	if self.health <= 0 then
+		player:kill()
+	end
 end
 
 function player:kill()
@@ -39,6 +53,7 @@ function player:kill()
 	--StateManager.load("defeat")
 
 	-- temporary defeat
+	self.health = 0
 	StateManager.defeatNow()
 end
 

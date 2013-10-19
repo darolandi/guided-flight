@@ -13,7 +13,9 @@ block.width = BLOCK_SIZE
 block.height = BLOCK_SIZE
 
 block.pathing = true
-block.imageName = "block_purple"
+block.harmful = true
+block.imageNameAlive = "block_purple"
+block.imageNameDead = "block_purple"
 
 --[[
 	args:
@@ -30,11 +32,19 @@ function block:load(args)
 	block.type = args.type
 	block.special = args.special or nil
 
-	block.image = ImageManager.getImage(self.imageName)
+	block.image = ImageManager.getImage(self.imageNameAlive)
 end
 
 function block:onCollide(triggering)
-	triggering:kill()
+	if self.harmful then
+		triggering:damage(DAMAGE_PER_BLOCK)
+		self:kill()
+	end
+end
+
+function block:kill()
+	block.image = ImageManager.getImage(self.imageNameDead)
+	self.harmful = false
 end
 
 return block

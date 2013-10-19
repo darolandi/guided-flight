@@ -121,6 +121,16 @@ function EntityManager.getPlayer()
 	return player
 end
 
+function EntityManager.killPlayerIfOut()
+	if (player.x < BOUNDARY_LEFT)
+		or (player.x > BOUNDARY_RIGHT)
+		or (player.y < BOUNDARY_UP)
+		or (player.y > BOUNDARY_DOWN) then
+
+		player:kill()
+	end
+end
+
 function EntityManager.checkPlayerCollision()
 	-- This is the only collision I care about
 	for _, entity in ipairs(entities) do

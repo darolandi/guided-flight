@@ -13,7 +13,7 @@ local BG_COLOR = {66, 255, 255}
 local player = nil
 local score = 0
 
-local spawnTicker = 0
+local blockTicker = 0 -- ticks up every new block generated
 local clock = 0
 local gameSpeed = INIT_GAMESPEED
 local gameDirection = DIRECTION.RIGHT
@@ -71,11 +71,9 @@ end
 
 local function updateDynamicSpeedFactor(dt)
 	-- magic formula
-	gameSpeed = MAX_GAMESPEED + (INIT_GAMESPEED - MAX_GAMESPEED) * math.exp(-1 * SPEEDUP_FACTOR * dt * spawnTicker)
+	gameSpeed = MAX_GAMESPEED + (INIT_GAMESPEED - MAX_GAMESPEED) * math.exp(-1 * SPEEDUP_FACTOR * dt * blockTicker)
 
 	DYNAMIC_SPEED_FACTOR = gameSpeed / INIT_GAMESPEED
-
-	print(DYNAMIC_SPEED_FACTOR)
 end
 
 local function dynamic(dt)
@@ -83,7 +81,7 @@ local function dynamic(dt)
 end
 
 local function addScore(dt)
-	score = score + dt
+	score = score + SCORE_FACTOR * dt
 end
 
 local function addUpBoundary()
@@ -153,8 +151,8 @@ local function updateClock(dt)
 		createNewBoundaries()
 		clock = 0
 
-		spawnTicker = spawnTicker + 1
-		if spawnTicker % SPAWNDATA.FREQUENCY_TICKS == 0 then
+		blockTicker = blockTicker + 1
+		if blockTicker % SPAWNDATA.FREQUENCY_TICKS == 0 then
 			spawnLogic()
 		end
 	end
@@ -212,17 +210,40 @@ function love.update(dt)
 	updatePlayerPos(dt)
 	moveBlocks(dt)
 
+	EntityManager.killPlayerIfOut()
 	EntityManager.checkPlayerCollision()
 	EntityManager.outOfBoundsCleanUp( boundaryFilter() )
 end
 
+local function healthBar()
+	local health = ""
+
+	for i = HEALTHBAR_INCREMENT, INIT_HEALTH, HEALTHBAR_INCREMENT do
+		if i <= player.health then
+			health = health .. "|"
+		else
+			health = health .. " "
+		end
+	end
+
+	return health
+end
+
+local function updateHUD()
+	love.graphics.setColor(255, 255, 255)
+	love.graphics.print("SCORE: " .. round(score, 0), HUD_X, HUD_Y)
+	love.graphics.print("GAMESPEED: " .. round(DYNAMIC_SPEED_FACTOR, 2) .. "x", HUD_X, HUD_Y + LINE_SIZE)
+	love.graphics.print("HEALTH: " .. "[" .. healthBar() .. "]", HUD_X, HUD_Y + LINE_SIZE * 2)
+end
+
 function love.draw()
 	EntityManager.drawAll()
+	updateHUD()
 
 	-- temporary
 	if StateManager.defeatState() then
 		love.graphics.setColor(0, 0, 0)
-		love.graphics.print("DEFEAT!", 100, 100)
+		love.graphics.print("DEFEAT!", HUD_X, HUD_Y + LINE_SIZE * 3)
 	end
 end
 
