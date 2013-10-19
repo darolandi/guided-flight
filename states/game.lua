@@ -401,7 +401,7 @@ function love.update(dt)
 
 	if StateManager.getDefeatState() then
 		EntityManager.clear()
-		StateManager.load("defeat", {})
+		StateManager.load("defeat", {["score"] = score})
 	end
 end
 
