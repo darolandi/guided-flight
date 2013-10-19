@@ -12,6 +12,7 @@ local BG_COLOR = {66, 255, 255}
 
 local player = nil
 local score = 0
+local livingDangerous = false
 
 local clock = 0
 local blockTicker = 0 										-- ticks up every new block generated
@@ -107,7 +108,15 @@ local function dynamic(dt)
 end
 
 local function addScore(dt)
-	score = score + SCORE_FACTOR * dt
+	if player.health <= INIT_HEALTH * HEALTH_FACTOR_TO_BONUS then
+		livingDangerous = true
+		score = score + SCORE_FACTOR * BONUS_FACTOR * dt
+	else
+		livingDangerous = false
+		score = score + SCORE_FACTOR * dt
+	end
+
+
 end
 
 local function addUpBoundary()
@@ -361,11 +370,11 @@ local function setDirection(direction)
 	gameDirection = directionAfter
 	initBoundaries()
 
-	if ((directionBefore == DIRECTION.LEFT) or (directionBefore == DIRECTION.RIGHT))
-		and ((directionAfter == DIRECTION.UP) or (directionAfter == DIRECTION.DOWN)) then
+	if ( (directionBefore == DIRECTION.LEFT) or (directionBefore == DIRECTION.RIGHT) )
+		and ( (directionAfter == DIRECTION.UP) or (directionAfter == DIRECTION.DOWN) ) then
 		swapBlocksDimensions()
-	elseif ((directionBefore == DIRECTION.UP) or (directionBefore == DIRECTION.DOWN))
-		and ((directionAfter == DIRECTION.LEFT) or (directionAfter == DIRECTION.RIGHT)) then
+	elseif ( (directionBefore == DIRECTION.UP) or (directionBefore == DIRECTION.DOWN) )
+		and ( (directionAfter == DIRECTION.LEFT) or (directionAfter == DIRECTION.RIGHT) ) then
 		swapBlocksDimensions()
 	end
 end
@@ -421,7 +430,13 @@ end
 
 local function updateHUD()
 	love.graphics.setColor(255, 255, 255)
-	love.graphics.print("SCORE: " .. round(score, 0), HUD_X, HUD_Y)
+
+	if livingDangerous then
+		love.graphics.print("SCORE: " .. round(score, 0) .. "++ LIVING DANGEROUS (" .. BONUS_FACTOR .. "x)", HUD_X, HUD_Y)
+	else
+		love.graphics.print("SCORE: " .. round(score, 0), HUD_X, HUD_Y)
+	end
+
 	love.graphics.print("GAMESPEED: " .. round(DYNAMIC_SPEED_FACTOR, 2) .. "x", HUD_X, HUD_Y + LINE_SIZE)
 	love.graphics.print("HEALTH: " .. "[" .. healthBar() .. "]", HUD_X, HUD_Y + LINE_SIZE * 2)
 end
