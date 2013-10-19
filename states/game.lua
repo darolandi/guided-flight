@@ -220,6 +220,11 @@ function love.update(dt)
 	EntityManager.killPlayerIfOut()
 	EntityManager.checkPlayerCollision()
 	EntityManager.outOfBoundsCleanUp( boundaryFilter() )
+
+	if StateManager.getDefeatState() then
+		EntityManager.clear()
+		StateManager.load("defeat", {})
+	end
 end
 
 local function healthBar()
@@ -248,10 +253,10 @@ function love.draw()
 	updateHUD()
 
 	-- temporary
-	if StateManager.defeatState() then
-		love.graphics.setColor(0, 0, 0)
-		love.graphics.print("DEFEAT!", HUD_X, HUD_Y + LINE_SIZE * 3)
-	end
+	-- if StateManager.defeatState() then
+	-- 	love.graphics.setColor(0, 0, 0)
+	-- 	love.graphics.print("DEFEAT!", HUD_X, HUD_Y + LINE_SIZE * 3)
+	-- end
 end
 
 local function updatePlayerSpeed()

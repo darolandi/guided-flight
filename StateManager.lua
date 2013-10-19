@@ -37,6 +37,27 @@ function StateManager.init()
 	loadStates()
 end
 
+--[[
+	Authors:
+		Dan Wager
+]]
+local function clearLove()
+    -- Not sure if we should nil this one out... lol
+    --love.load = nil
+    love.draw = nil
+    love.update = nil
+    love.focus = nil
+    love.run = nil
+    love.quit = nil
+    love.mousepressed = nil
+    love.mousereleased = nil
+    love.joystickpressed = nil
+    love.joystickreleased = nil
+    love.keypressed = nil
+    love.keyreleased = nil
+    defeat = false
+end
+
 function StateManager.load(state, args)
 	if not args then
 		args = {}
@@ -47,6 +68,7 @@ function StateManager.load(state, args)
 		return nil
 	end
 
+	clearLove()
 	print("Loading state: " .. state)
 	currentState = state
 
@@ -58,6 +80,6 @@ function StateManager.defeatNow()
 	defeat = true
 end
 
-function StateManager.defeatState()
+function StateManager.getDefeatState()
 	return defeat
 end

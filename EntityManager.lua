@@ -35,6 +35,11 @@ function EntityManager.init()
 		return nil
 	end
 
+	types = {}
+	entities = {}
+	idCounter = 1
+	player = nil
+
 	printLoading()
 	loadEntities()
 end
@@ -191,3 +196,7 @@ end
 -- 		entity:move(dt)
 -- 	end
 -- end
+
+function EntityManager.clear()
+	entities = {}
+end
