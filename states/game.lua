@@ -9,12 +9,12 @@
 local PLAYER_STARTX = 100
 local PLAYER_STARTY = 200
 local BG_COLOR = {66, 255, 255}
-local MOVESPEED = 100
 
-local clock = 0
-local gameSpeed = INIT_GAMESPEED
 local player = nil
 
+local spawnTicker = 0
+local clock = 0
+local gameSpeed = INIT_GAMESPEED
 local gameDirection = DIRECTION.RIGHT
 
 local leftPressed = false
@@ -67,32 +67,6 @@ function load(args)
 	initBoundaries()
 end
 
-local function updateClock(dt)
-	clock = clock + gameSpeed * dt
-end
-
-local function updatePlayerPos(dt)
-	player:move(dt)
-	player:gravity(dt)
-	if upPressed then
-		player:thrust(dt)
-	end
-end
-
-local function moveBoundaries(dt)
-	if gameDirection == DIRECTION.RIGHT then
-		EntityManager.moveBoundaryLeft(gameSpeed, dt)
-
-	elseif gameDirection == DIRECTION.LEFT then
-		EntityManager.moveBoundaryRight(gameSpeed, dt)
-
-	elseif gameDirection == DIRECTION.UP then
-		EntityManager.moveBoundaryDown(gameSpeed, dt)
-
-	elseif gameDirection == DIRECTION.DOWN then
-		EntityManager.moveBoundaryUp(gameSpeed, dt)
-	end
-end
 
 local function addUpBoundary()
 	if gameDirection == DIRECTION.RIGHT then
@@ -135,12 +109,63 @@ local function createNewBoundaries()
 	end
 end
 
-local function updateBoundaries()
+local function spawnLogic()
+	-- add direction factor here
+	local horizontalBuffer = SPAWNDATA.HORIZONTAL_BUFFER + math.random() * SPAWNDATA.HORIZONTAL_VARIANCE
+	local verticalBuffer = 0
+
+	-- ORDER/PRIORITY MATTERS
+	if math.random() <= SPAWNDATA.SPAWN_CHANCE.BIGWALL then
+		EntityManager.createEnemy("BIGWALL", player.x + horizontalBuffer, player.y + verticalBuffer)
+	elseif math.random() <= SPAWNDATA.SPAWN_CHANCE.WALL then
+		EntityManager.createEnemy("WALL", player.x + horizontalBuffer, player.y + verticalBuffer)
+	elseif math.random() <= SPAWNDATA.SPAWN_CHANCE.HUGE then
+		EntityManager.createEnemy("HUGE", player.x + horizontalBuffer, player.y + verticalBuffer)
+	elseif math.random() <= SPAWNDATA.SPAWN_CHANCE.BIG then
+		EntityManager.createEnemy("BIG", player.x + horizontalBuffer, player.y + verticalBuffer)
+	elseif math.random() <= SPAWNDATA.SPAWN_CHANCE.SMALL then
+		EntityManager.createEnemy("SMALL", player.x + horizontalBuffer, player.y + verticalBuffer)
+	end
+end
+
+local function updateClock(dt)
+	clock = clock + gameSpeed * dt
+
 	if clock >= BLOCK_SIZE then
 		createNewBoundaries()
 		clock = 0
+
+		spawnTicker = spawnTicker + 1
+		if spawnTicker == SPAWNDATA.FREQUENCY_TICKS then
+			spawnLogic()
+			spawnTicker = 0
+		end
 	end
 end
+
+local function updatePlayerPos(dt)
+	player:move(dt)
+	player:gravity(dt)
+	if upPressed then
+		player:thrust(dt)
+	end
+end
+
+local function moveBlocks(dt)
+	if gameDirection == DIRECTION.RIGHT then
+		EntityManager.moveBlocksLeft(gameSpeed, dt)
+
+	elseif gameDirection == DIRECTION.LEFT then
+		EntityManager.moveBlocksRight(gameSpeed, dt)
+
+	elseif gameDirection == DIRECTION.UP then
+		EntityManager.moveBlocksDown(gameSpeed, dt)
+
+	elseif gameDirection == DIRECTION.DOWN then
+		EntityManager.moveBlocksUp(gameSpeed, dt)
+	end
+end
+
 
 local function boundaryFilter()
 	if gameDirection == DIRECTION.RIGHT then
@@ -161,9 +186,8 @@ end
 function love.update(dt)
 	updateClock(dt)
 	updatePlayerPos(dt)
-	moveBoundaries(dt)
+	moveBlocks(dt)
 
-	updateBoundaries()
 	EntityManager.checkPlayerCollision()
 	EntityManager.outOfBoundsCleanUp( boundaryFilter() )
 end

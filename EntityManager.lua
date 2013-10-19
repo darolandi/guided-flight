@@ -81,6 +81,27 @@ function EntityManager.create(type, args)
 	createEntity(type, args)
 end
 
+function EntityManager.createEnemy(unittype, x, y)
+	if not UNITDATA[unittype] then
+		print("EntityManager.createEnemy: unittype not found! " .. unittype)
+		return nil
+	end
+
+	local args = {}
+	args.y = y
+
+	for row = 1, UNITDATA[unittype].HEIGHT do
+		args.x = x
+
+		for col = 1, UNITDATA[unittype].WIDTH do
+			EntityManager.create("block", args)
+
+			args.x = args.x + BLOCK_SIZE
+		end
+		args.y = args.y + BLOCK_SIZE
+	end
+end
+
 function EntityManager.deriveBase()
 	return types["base"]()
 end
@@ -127,9 +148,9 @@ end
 -- 	end
 -- end
 
-function EntityManager.moveBoundaryLeft(gameSpeed, dt)
+function EntityManager.moveBlocksLeft(gameSpeed, dt)
 	for _, entity in ipairs(entities) do
-		if entity.special == "boundary" then
+		if entity.pathing then
 			entity.vx = -gameSpeed
 			entity:move(dt)
 		end
