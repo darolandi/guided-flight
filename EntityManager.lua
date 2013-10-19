@@ -40,7 +40,7 @@ function EntityManager.init()
 end
 
 local function saveToTable(newEntity)
-	entities[idCounter] = newEntity
+	table.insert( entities, newEntity )
 	idCounter = idCounter + 1
 end
 
@@ -109,12 +109,15 @@ function EntityManager.checkPlayerCollision()
 end
 
 function EntityManager.outOfBoundsCleanUp(filterBad)
-	for key, entity in ipairs(entities) do
-		-- print(entity:getRight() )
-		if filterBad(entity) then
-			table.removeByKey(entities, key)
+	local newEntities = {}
+
+	for _, entity in ipairs(entities) do
+		if not filterBad(entity) then
+			newEntities[#newEntities + 1] = entity
 		end
 	end
+
+	entities = newEntities
 end
 
 -- function EntityManager.moveCollidablesRight(gameSpeed, dt)
@@ -125,10 +128,9 @@ end
 -- end
 
 function EntityManager.moveBoundaryLeft(gameSpeed, dt)
-	print(#entities)
 	for _, entity in ipairs(entities) do
 		if entity.special == "boundary" then
-			entity.vx = -1 * gameSpeed
+			entity.vx = -gameSpeed
 			entity:move(dt)
 		end
 	end

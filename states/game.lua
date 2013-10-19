@@ -165,7 +165,7 @@ function love.update(dt)
 
 	updateBoundaries()
 	EntityManager.checkPlayerCollision()
-	-- EntityManager.outOfBoundsCleanUp( boundaryFilter() )
+	EntityManager.outOfBoundsCleanUp( boundaryFilter() )
 end
 
 function love.draw()
