@@ -85,6 +85,10 @@ function base:thrust(dt)
 	self.vy = self.vy - THRUST * dt
 end
 
+function base:drop(dt)
+	self.vy = self.vy + DROP * dt
+end
+
 function base:containsPoint(x, y)
 	return (self.x <= x) and (x <= self:getRight() )
 		and (self.y <= y) and (y <= self:getDown() )

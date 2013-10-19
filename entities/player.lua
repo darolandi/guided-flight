@@ -11,6 +11,7 @@ local player = EntityManager.deriveBase()
 -- pixels
 player.width = 40
 player.height = 40
+player.health = INIT_HEALTH
 
 player.pathing = false
 player.imageName = "player_smiley"

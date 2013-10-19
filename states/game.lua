@@ -11,6 +11,7 @@ local PLAYER_STARTY = 200
 local BG_COLOR = {66, 255, 255}
 
 local player = nil
+local score = 0
 
 local spawnTicker = 0
 local clock = 0
@@ -68,6 +69,23 @@ function load(args)
 end
 
 
+local function updateDynamicSpeedFactor(dt)
+	-- magic formula
+	gameSpeed = MAX_GAMESPEED + (INIT_GAMESPEED - MAX_GAMESPEED) * math.exp(-1 * SPEEDUP_FACTOR * dt * spawnTicker)
+
+	DYNAMIC_SPEED_FACTOR = gameSpeed / INIT_GAMESPEED
+
+	print(DYNAMIC_SPEED_FACTOR)
+end
+
+local function dynamic(dt)
+	return DYNAMIC_SPEED_FACTOR * dt
+end
+
+local function addScore(dt)
+	score = score + dt
+end
+
 local function addUpBoundary()
 	if gameDirection == DIRECTION.RIGHT then
 		local args = {}
@@ -112,7 +130,7 @@ end
 local function spawnLogic()
 	-- add direction factor here
 	local horizontalBuffer = SPAWNDATA.HORIZONTAL_BUFFER + math.random() * SPAWNDATA.HORIZONTAL_VARIANCE
-	local verticalBuffer = 0
+	local verticalBuffer = (math.random() - 0.5) * SPAWNDATA.VERTICAL_VARIANCE
 
 	-- ORDER/PRIORITY MATTERS
 	if math.random() <= SPAWNDATA.SPAWN_CHANCE.BIGWALL then
@@ -136,9 +154,8 @@ local function updateClock(dt)
 		clock = 0
 
 		spawnTicker = spawnTicker + 1
-		if spawnTicker == SPAWNDATA.FREQUENCY_TICKS then
+		if spawnTicker % SPAWNDATA.FREQUENCY_TICKS == 0 then
 			spawnLogic()
-			spawnTicker = 0
 		end
 	end
 end
@@ -148,6 +165,9 @@ local function updatePlayerPos(dt)
 	player:gravity(dt)
 	if upPressed then
 		player:thrust(dt)
+	end
+	if downPressed then
+		player:drop(dt)
 	end
 end
 
@@ -184,6 +204,10 @@ end
 
 -- CORE
 function love.update(dt)
+	updateDynamicSpeedFactor(dt)
+	dt = dynamic(dt)
+
+	addScore(dt)
 	updateClock(dt)
 	updatePlayerPos(dt)
 	moveBlocks(dt)

@@ -87,6 +87,10 @@ function EntityManager.createEnemy(unittype, x, y)
 		return nil
 	end
 
+	if DEBUG then
+		print("Creating enemy " .. unittype .. " at " .. x .. ", " .. y)
+	end
+
 	local args = {}
 	args.y = y
 
