@@ -438,7 +438,7 @@ local function updateHUD()
 	love.graphics.setColor(255, 255, 255)
 
 	if livingDangerous then
-		love.graphics.print("SCORE: " .. round(score, 0) .. "++ LIVING DANGEROUS (" .. BONUS_FACTOR .. "x)", HUD_X, HUD_Y)
+		love.graphics.print("SCORE: " .. round(score, 0) .. "++ LIVING DANGEROUSLY (" .. BONUS_FACTOR .. "x)", HUD_X, HUD_Y)
 	else
 		love.graphics.print("SCORE: " .. round(score, 0), HUD_X, HUD_Y)
 	end
