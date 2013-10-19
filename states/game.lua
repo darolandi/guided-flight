@@ -340,21 +340,25 @@ end
 	The only place where those global values are altered.
 ]]
 local function swapBlocksDimensions()
-	print(type(UNITDATA))
-	for key, unittype in ipairs(UNITDATA) do
-		print("HOY")
-		print(key .. " " .. unittype.WIDTH .. " " .. unittype.HEIGHT)
-		unittype.WIDTH, unittype.HEIGHT = unittype.HEIGHT, unittype.WIDTH
-	end
-	print("SWAP")
+	-- ipairs didn't work, resort to manual work
+	UNITDATA["BIGWALL"].WIDTH, UNITDATA.BIGWALL.HEIGHT = UNITDATA.BIGWALL.HEIGHT, UNITDATA.BIGWALL.WIDTH
+	UNITDATA["WALL"].WIDTH, UNITDATA.WALL.HEIGHT = UNITDATA.WALL.HEIGHT, UNITDATA.WALL.WIDTH
+	UNITDATA["HUGE"].WIDTH, UNITDATA.HUGE.HEIGHT = UNITDATA.HUGE.HEIGHT, UNITDATA.HUGE.WIDTH
+	UNITDATA["BIG"].WIDTH, UNITDATA.BIG.HEIGHT = UNITDATA.BIG.HEIGHT, UNITDATA.BIG.WIDTH
+	UNITDATA["SMALL"].WIDTH, UNITDATA.SMALL.HEIGHT = UNITDATA.SMALL.HEIGHT, UNITDATA.SMALL.WIDTH
+	UNITDATA["ARROW"].WIDTH, UNITDATA.ARROW.HEIGHT = UNITDATA.ARROW.HEIGHT, UNITDATA.ARROW.WIDTH
+	UNITDATA["ARROWALL"].WIDTH, UNITDATA.ARROWALL.HEIGHT = UNITDATA.ARROWALL.HEIGHT, UNITDATA.ARROWALL.WIDTH
 end
 
 local function setDirection(direction)
 	local directionBefore = gameDirection
 	local directionAfter = direction
 
-	gameDirection = directionAfter
+	if directionBefore == directionAfter then
+		return nil
+	end
 
+	gameDirection = directionAfter
 	initBoundaries()
 
 	if ((directionBefore == DIRECTION.LEFT) or (directionBefore == DIRECTION.RIGHT))
