@@ -35,11 +35,6 @@ function EntityManager.init()
 		return nil
 	end
 
-	types = {}
-	entities = {}
-	idCounter = 1
-	player = nil
-
 	printLoading()
 	loadEntities()
 end
@@ -86,10 +81,15 @@ function EntityManager.create(type, args)
 	createEntity(type, args)
 end
 
+--[[
+	The most hack-y method.
+]]
 function EntityManager.createUnit(unittype, x, y)
 	if not UNITDATA[unittype] then
-		print("EntityManager.createUnit: unittype not found! " .. unittype)
-		return nil
+		if not DUMMYDATA[ unittype:gsub("_all", "") ] then
+			print("EntityManager.createUnit: unittype not found! " .. unittype)
+			return nil
+		end
 	end
 
 	if DEBUG then
@@ -105,11 +105,22 @@ function EntityManager.createUnit(unittype, x, y)
 		return nil
 	end
 
+	if string.endsWith(unittype, "arrow_all") then
+		entity_type = unittype:gsub("_all", "")
+		unittype = "ARROWALL"
+	elseif string.endsWith(unittype, "arrow") then
+		entity_type = unittype
+		unittype = "ARROW"
+	else
+		entity_type = "block"
+	end
+
+	-- should only accept "block" or the 4 kinds of arrows
 	for row = 1, UNITDATA[unittype].HEIGHT do
 		args.x = x
 
 		for col = 1, UNITDATA[unittype].WIDTH do
-			EntityManager.create("block", args)
+			EntityManager.create( string.lower(entity_type), args)
 
 			args.x = args.x + BLOCK_SIZE
 		end
@@ -133,20 +144,26 @@ function EntityManager.getPlayer()
 end
 
 function EntityManager.killPlayerIfOut()
-	if (player.x < BOUNDARY_LEFT)
-		or (player.x > BOUNDARY_RIGHT)
-		or (player.y < BOUNDARY_UP)
-		or (player.y > BOUNDARY_DOWN) then
+	if (player:getRight() < BOUNDARY_LEFT)
+		or (player:getLeft() > BOUNDARY_RIGHT)
+		or (player:getDown() < BOUNDARY_UP)
+		or (player:getUp() > BOUNDARY_DOWN) then
 
 		player:kill()
 	end
 end
 
-function EntityManager.checkPlayerCollision()
+function EntityManager.checkPlayerCollision( setDirection )
+	local potentialDirectionChange = nil
+
 	-- This is the only collision I care about
 	for _, entity in ipairs(entities) do
 		if entity.pathing and entity:contains(player) then
-			entity:onCollide(player)
+			potentialDirectionChange = entity:onCollide(player)
+
+			if potentialDirectionChange then
+				setDirection( potentialDirectionChange )
+			end
 
 			if EASY_COLLISION then
 				return nil
@@ -167,36 +184,60 @@ function EntityManager.outOfBoundsCleanUp(filterBad)
 	entities = newEntities
 end
 
--- function EntityManager.moveCollidablesRight(gameSpeed, dt)
--- 	for _, entity in ipairs(collidables) do
--- 		entity.vx = gameSpeed
--- 		entity:move(dt)
--- 	end
--- end
-
-function EntityManager.moveBlocksLeft(gameSpeed, dt)
+function EntityManager.moveBlocksRight(gameSpeed, dt)
 	for _, entity in ipairs(entities) do
 		if entity.pathing then
-			entity.vx = -gameSpeed
+			entity.vx = gameSpeed
+			entity.vy = 0
 			entity:move(dt)
 		end
 	end
 end
 
--- function EntityManager.moveCollidablesUp(gameSpeed, dt)
--- 	for _, entity in ipairs(collidables) do
--- 		entity.vy = -gameSpeed
--- 		entity:move(dt)
--- 	end
--- end
+function EntityManager.moveBlocksLeft(gameSpeed, dt)
+	for _, entity in ipairs(entities) do
+		if entity.pathing then
+			entity.vx = -gameSpeed
+			entity.vy = 0
+			entity:move(dt)
+		end
+	end
+end
 
--- function EntityManager.moveCollidablesDown(gameSpeed, dt)
--- 	for _, entity in ipairs(collidables) do
--- 		entity.vy = gameSpeed
--- 		entity:move(dt)
--- 	end
--- end
+function EntityManager.moveBlocksUp(gameSpeed, dt)
+	for _, entity in ipairs(entities) do
+		if entity.pathing then
+			entity.vx = 0
+			entity.vy = -gameSpeed
+			entity:move(dt)
+		end
+	end
+end
+
+function EntityManager.moveBlocksDown(gameSpeed, dt)
+	for _, entity in ipairs(entities) do
+		if entity.pathing then
+			entity.vx = 0
+			entity.vy = gameSpeed
+			entity:move(dt)
+		end
+	end
+end
 
 function EntityManager.clear()
 	entities = {}
+	idCounter = 1
+end
+
+function EntityManager.softClear()
+	local newEntities = {}
+
+	for _, entity in ipairs(entities) do
+		if entity.type == "player" then
+			newEntities[#newEntities + 1] = entity
+		end
+	end
+
+	entities = newEntities
+	idCounter = 2
 end

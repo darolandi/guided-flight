@@ -13,8 +13,9 @@ local BG_COLOR = {66, 255, 255}
 local player = nil
 local score = 0
 
-local blockTicker = 0 -- ticks up every new block generated
 local clock = 0
+local blockTicker = 0 										-- ticks up every new block generated
+local directionChangeCountdown = DIRECTION_CHANGE_DISTANCE 	-- ticks down every new block generated
 local gameSpeed = INIT_GAMESPEED
 local gameDirection = DIRECTION.RIGHT
 
@@ -46,11 +47,36 @@ local function initDownBoundary()
 	end
 end
 
+local function initLeftBoundary()
+	local args = {}
+	args.x = BOUNDARY_LEFT
+	args.special = "boundary"
+
+	for y = 0, SCREEN_HEIGHT, BLOCK_SIZE do
+		args.y = y
+		EntityManager.create("block", args)
+	end
+end
+
+local function initRightBoundary()
+	local args = {}
+	args.x = BOUNDARY_RIGHT - BLOCK_SIZE
+	args.special = "boundary"
+
+	for y = 0, SCREEN_HEIGHT, BLOCK_SIZE do
+		args.y = y
+		EntityManager.create("block", args)
+	end
+end
+
 local function initBoundaries()
 	if (gameDirection == DIRECTION.RIGHT) or (gameDirection == DIRECTION.LEFT) then
 		initUpBoundary()
 		initDownBoundary()
+		return
 	end
+	initLeftBoundary()
+	initRightBoundary()
 end
 
 function load(args)
@@ -112,23 +138,88 @@ local function addDownBoundary()
 	elseif gameDirection == DIRECTION.LEFT then
 		local args = {}
 		args.x = BOUNDARY_LEFT - BLOCK_SIZE
-		args.y = BOUNDARY_UP - BLOCK_SIZE
+		args.y = BOUNDARY_DOWN - BLOCK_SIZE
 		args.special = "boundary"
 		EntityManager.create("block", args)
 	end
 end
 
+local function addLeftBoundary()
+	if gameDirection == DIRECTION.UP then
+		local args = {}
+		args.x = BOUNDARY_LEFT
+		args.y = BOUNDARY_UP - BLOCK_SIZE
+		args.special = "boundary"
+		EntityManager.create("block", args)
+
+	elseif gameDirection == DIRECTION.DOWN then
+		local args = {}
+		args.x = BOUNDARY_LEFT
+		args.y = BOUNDARY_DOWN
+		args.special = "boundary"
+		EntityManager.create("block", args)
+	end
+end
+
+local function addRightBoundary()
+	if gameDirection == DIRECTION.UP then
+		local args = {}
+		args.x = BOUNDARY_RIGHT - BLOCK_SIZE
+		args.y = BOUNDARY_UP - BLOCK_SIZE
+		args.special = "boundary"
+		EntityManager.create("block", args)
+
+	elseif gameDirection == DIRECTION.DOWN then
+		local args = {}
+		args.x = BOUNDARY_RIGHT - BLOCK_SIZE
+		args.y = BOUNDARY_DOWN
+		args.special = "boundary"
+		EntityManager.create("block", args)
+	end
+end
+
+
 local function createNewBoundaries()
 	if (gameDirection == DIRECTION.RIGHT) or (gameDirection == DIRECTION.LEFT) then
 		addUpBoundary()
 		addDownBoundary()
+		return
 	end
+
+	addLeftBoundary()
+	addRightBoundary()
+end
+
+local function getBufferedDistanceXY()
+	local horizontalBuffer = 0
+	local verticalBuffer = 0
+
+	-- add direction factor here
+	if (gameDirection == DIRECTION.RIGHT) or (gameDirection == DIRECTION.LEFT) then
+		horizontalBuffer = SPAWNDATA.HORIZONTAL_BUFFER + math.random() * SPAWNDATA.HORIZONTAL_VARIANCE
+		verticalBuffer = (math.random() - 0.5) * SPAWNDATA.VERTICAL_VARIANCE
+
+		if gameDirection == DIRECTION.LEFT then
+			horizontalBuffer = -horizontalBuffer
+		end
+
+		return horizontalBuffer, verticalBuffer
+	end
+
+	-- DIRECTION.UP or DIRECTION.DOWN
+	horizontalBuffer = (math.random() - 0.5) * SPAWNDATA.HORIZONTAL_VARIANCE
+	verticalBuffer = SPAWNDATA.VERTICAL_BUFFER + math.random() * SPAWNDATA.VERTICAL_VARIANCE
+
+	if gameDirection == DIRECTION.UP then
+		verticalBuffer = -verticalBuffer
+	end
+
+	return horizontalBuffer, verticalBuffer
 end
 
 local function spawnLogic()
 	-- add direction factor here
-	local horizontalBuffer = SPAWNDATA.HORIZONTAL_BUFFER + math.random() * SPAWNDATA.HORIZONTAL_VARIANCE
-	local verticalBuffer = (math.random() - 0.5) * SPAWNDATA.VERTICAL_VARIANCE
+	local horizontalBuffer, verticalBuffer = getBufferedDistanceXY()
 
 	-- ORDER/PRIORITY MATTERS
 	if math.random() <= SPAWNDATA.SPAWN_CHANCE.BIGWALL then
@@ -151,17 +242,71 @@ local function spawnLogic()
 	end
 end
 
+local function getRandomPossibleDirection()
+	local possibleDirections = {}
+
+	if gameDirection == DIRECTION.RIGHT then
+		possibleDirections[0] = DIRECTION.LEFT
+		possibleDirections[1] = DIRECTION.UP
+		possibleDirections[2] = DIRECTION.DOWN
+
+	elseif gameDirection == DIRECTION.LEFT then
+		possibleDirections[0] = DIRECTION.RIGHT
+		possibleDirections[1] = DIRECTION.UP
+		possibleDirections[2] = DIRECTION.DOWN
+
+	elseif gameDirection == DIRECTION.UP then
+		possibleDirections[0] = DIRECTION.RIGHT
+		possibleDirections[1] = DIRECTION.LEFT
+		possibleDirections[2] = DIRECTION.DOWN
+
+	elseif gameDirection == DIRECTION.DOWN then
+		possibleDirections[0] = DIRECTION.RIGHT
+		possibleDirections[1] = DIRECTION.UP
+		possibleDirections[2] = DIRECTION.LEFT
+	end
+
+	local random_selector = math.random()
+
+	if random_selector <= 0.33 then
+		return possibleDirections[0]
+	elseif random_selector <= 0.66 then
+		return possibleDirections[1]
+	else
+		return possibleDirections[2]
+	end
+end
+
+local function forceDirectionChange()
+	local direction = getRandomPossibleDirection()
+	local horizontalBuffer, verticalBuffer = getBufferedDistanceXY()
+
+	EntityManager.createUnit( ARROWS[direction] .. "_all", player.x + horizontalBuffer, player.y + verticalBuffer)
+end
+
+local function updateBlockTicker()
+	blockTicker = blockTicker + 1
+	if blockTicker % SPAWNDATA.FREQUENCY_TICKS == 0 then
+		spawnLogic()
+	end
+end
+
+local function updateDirectionChangeCountdown()
+	directionChangeCountdown = directionChangeCountdown - 1
+	if directionChangeCountdown <= 0 then
+		directionChangeCountdown = DIRECTION_CHANGE_DISTANCE + math.random() * DIRECTION_CHANGE_VARIANCE
+		forceDirectionChange()
+	end
+end
+
 local function updateClock(dt)
 	clock = clock + gameSpeed * dt
 
 	if clock >= BLOCK_SIZE then
-		createNewBoundaries()
 		clock = 0
-
-		blockTicker = blockTicker + 1
-		if blockTicker % SPAWNDATA.FREQUENCY_TICKS == 0 then
-			spawnLogic()
-		end
+		createNewBoundaries()
+		updateBlockTicker()
+		updateDirectionChangeCountdown()
 	end
 end
 
@@ -191,6 +336,35 @@ local function moveBlocks(dt)
 	end
 end
 
+--[[
+	The only place where those global values are altered.
+]]
+local function swapBlocksDimensions()
+	print(type(UNITDATA))
+	for key, unittype in ipairs(UNITDATA) do
+		print("HOY")
+		print(key .. " " .. unittype.WIDTH .. " " .. unittype.HEIGHT)
+		unittype.WIDTH, unittype.HEIGHT = unittype.HEIGHT, unittype.WIDTH
+	end
+	print("SWAP")
+end
+
+local function setDirection(direction)
+	local directionBefore = gameDirection
+	local directionAfter = direction
+
+	gameDirection = directionAfter
+
+	initBoundaries()
+
+	if ((directionBefore == DIRECTION.LEFT) or (directionBefore == DIRECTION.RIGHT))
+		and ((directionAfter == DIRECTION.UP) or (directionAfter == DIRECTION.DOWN)) then
+		swapBlocksDimensions()
+	elseif ((directionBefore == DIRECTION.UP) or (directionBefore == DIRECTION.DOWN))
+		and ((directionAfter == DIRECTION.LEFT) or (directionAfter == DIRECTION.RIGHT)) then
+		swapBlocksDimensions()
+	end
+end
 
 local function boundaryFilter()
 	if gameDirection == DIRECTION.RIGHT then
@@ -218,7 +392,7 @@ function love.update(dt)
 	moveBlocks(dt)
 
 	EntityManager.killPlayerIfOut()
-	EntityManager.checkPlayerCollision()
+	EntityManager.checkPlayerCollision( setDirection )
 	EntityManager.outOfBoundsCleanUp( boundaryFilter() )
 
 	if StateManager.getDefeatState() then
@@ -251,12 +425,6 @@ end
 function love.draw()
 	EntityManager.drawAll()
 	updateHUD()
-
-	-- temporary
-	-- if StateManager.defeatState() then
-	-- 	love.graphics.setColor(0, 0, 0)
-	-- 	love.graphics.print("DEFEAT!", HUD_X, HUD_Y + LINE_SIZE * 3)
-	-- end
 end
 
 local function updatePlayerSpeed()

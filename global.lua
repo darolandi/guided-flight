@@ -39,6 +39,9 @@ SCORE_FACTOR = 1500
 HEALTHBAR_LENGTH = 20
 HEALTHBAR_INCREMENT = INIT_HEALTH / HEALTHBAR_LENGTH
 
+DIRECTION_CHANGE_DISTANCE = 10
+DIRECTION_CHANGE_VARIANCE = 10
+
 DIRECTION = {
 	["RIGHT"] = 0,
 	["LEFT"] = 1,
@@ -59,10 +62,9 @@ SPAWNDATA = {
 		["HUGE"] = 0.10,
 		["BIG"] = 0.3,
 		["SMALL"] = 0.7,
-		["HEALTH"] = 0.4
+		["HEALTH"] = 0.4,
 	}
 }
-
 
 UNITDATA = {
 	["BIGWALL"] = {
@@ -85,5 +87,28 @@ UNITDATA = {
 		["WIDTH"] = 1,
 		["HEIGHT"] = 1
 	},
-	["HEALTH"] = "dummy"
+
+	["ARROW"] = {
+		["WIDTH"] = 3,
+		["HEIGHT"] = 3
+	},
+	["ARROWALL"] = {
+		["WIDTH"] = 2,
+		["HEIGHT"] = 30
+	}
+
 }
+
+DUMMYDATA = {
+	["HEALTH"] = "dummy",
+	["rightarrow"] = "dummy",
+	["leftarrow"] = "dummy",
+	["uparrow"] = "dummy",
+	["downarrow"] = "dummy"
+}
+
+ARROWS = {}
+ARROWS[DIRECTION.RIGHT] = "rightarrow"
+ARROWS[DIRECTION.LEFT] = "leftarrow"
+ARROWS[DIRECTION.UP] = "uparrow"
+ARROWS[DIRECTION.DOWN] = "downarrow"
