@@ -13,3 +13,8 @@ end
 function string.endsWith(word, substr)
     return (substr == '') or (string.sub(word, -string.len(substr)) == substr)
 end
+
+function table.removeByKey(target, key)
+    print(key)
+    target[key] = nil
+end

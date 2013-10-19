@@ -12,5 +12,5 @@ function love.load()
     EntityManager.init()
     StateManager.init()
 
-    StateManager.load("game", {})
+    StateManager.load("game")
 end

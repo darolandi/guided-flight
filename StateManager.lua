@@ -11,6 +11,8 @@ StateManager = {}
 local PATH = "states/"
 
 local states = {}
+local currentState = nil
+local defeat = false
 
 local function printLoading()
 	print("Loading states...")
@@ -23,7 +25,6 @@ local function loadStates()
 		states[name] = love.filesystem.load(PATH .. file)
 		print("   " .. name)
 	end
-
 end
 
 function StateManager.init()
@@ -37,12 +38,26 @@ function StateManager.init()
 end
 
 function StateManager.load(state, args)
+	if not args then
+		args = {}
+	end
+
 	if not states[state] then
 		print("StateManager: state not found! " .. state)
 		return nil
 	end
 
 	print("Loading state: " .. state)
+	currentState = state
+
 	states[state]()
 	load(args)
+end
+
+function StateManager.defeatNow()
+	defeat = true
+end
+
+function StateManager.defeatState()
+	return defeat
 end

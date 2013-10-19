@@ -39,3 +39,11 @@ function ImageManager.init()
 	loadImages()
 end
 
+function ImageManager.getImage(name)
+	if not images[name] then
+		print("ImageManager: image not found!" .. name)
+		return nil
+	end
+
+	return images[name]
+end
