@@ -24,3 +24,9 @@ function round(number, place)
 
     return math.floor(number * math.pow(10, place)) / math.pow(10, place)
 end
+
+function distance(x1, y1, x2, y2)
+    local deltaX = x2 - x1
+    local deltaY = y2 - y1
+    return math.sqrt( deltaX * deltaX + deltaY * deltaY )
+end

@@ -158,7 +158,7 @@ function EntityManager.checkPlayerCollision( setDirection )
 
 	-- This is the only collision I care about
 	for _, entity in ipairs(entities) do
-		if entity.pathing and entity:contains(player) then
+		if entity.pathing and ( entity:contains(player) or player:contains(entity) ) then
 			potentialDirectionChange = entity:onCollide(player)
 
 			if potentialDirectionChange then

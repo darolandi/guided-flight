@@ -25,6 +25,10 @@ function base:getPos()
 	return self.x, self.y
 end
 
+function base:getCenter()
+	return (self.x + self.width)/2, (self.y + self.height)/2
+end
+
 function base:setSize(width, height)
 	self.width = width
 	self.height = height
@@ -99,6 +103,19 @@ function base:contains(entity)
 		or self:containsPoint(entity:getLeft(), entity:getDown())
 		or self:containsPoint(entity:getRight(), entity:getUp())
 		or self:containsPoint(entity:getRight(), entity:getDown())
+end
+
+function base:collidesPoint(x, y)
+	local center_x, center_y = self:getCenter()
+
+	return distance(center_x, center_y, x, y) <= HITBOX
+end
+
+function base:collides(entity)
+	return self:collidesPoint(entity:getLeft(), entity:getUp() )
+		or self:collidesPoint(entity:getLeft(), entity:getDown() )
+		or self:collidesPoint(entity:getRight(), entity:getUp() )
+		or self:collidesPoint(entity:getRight(), entity:getDown() )
 end
 
 return base

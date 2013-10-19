@@ -7,10 +7,12 @@ function love.load()
     require("ImageManager")
     require("EntityManager")
     require("StateManager")
+    require("SoundManager")
 
     ImageManager.init()
     EntityManager.init()
     StateManager.init()
+    SoundManager.init()
 
     StateManager.load("game")
 end
