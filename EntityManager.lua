@@ -81,18 +81,24 @@ function EntityManager.create(type, args)
 	createEntity(type, args)
 end
 
-function EntityManager.createEnemy(unittype, x, y)
+function EntityManager.createUnit(unittype, x, y)
 	if not UNITDATA[unittype] then
-		print("EntityManager.createEnemy: unittype not found! " .. unittype)
+		print("EntityManager.createUnit: unittype not found! " .. unittype)
 		return nil
 	end
 
 	if DEBUG then
-		print("Creating enemy " .. unittype .. " at " .. x .. ", " .. y)
+		-- print("Creating unit " .. unittype .. " at " .. x .. ", " .. y)
 	end
 
 	local args = {}
 	args.y = y
+
+	if unittype == "HEALTH" then
+		args.x = x
+		EntityManager.create("health", args)
+		return nil
+	end
 
 	for row = 1, UNITDATA[unittype].HEIGHT do
 		args.x = x
@@ -137,8 +143,9 @@ function EntityManager.checkPlayerCollision()
 		if entity.pathing and entity:contains(player) then
 			entity:onCollide(player)
 
-			-- for now, only want the first collision
-			return nil
+			if EASY_COLLISION then
+				return nil
+			end
 		end
 	end
 end

@@ -31,8 +31,9 @@ DROP = THRUST
 MOVESPEED = 200
 
 INIT_HEALTH = 100
-HEALTH_PICKUP = 40
+HEALTH_PICKUP = 30
 DAMAGE_PER_BLOCK = 3
+EASY_COLLISION = false -- only 1 collision counts if the player hits overlapping blocks
 
 SCORE_FACTOR = 1500
 HEALTHBAR_LENGTH = 20
@@ -57,7 +58,8 @@ SPAWNDATA = {
 		["WALL"] = 0.3,
 		["HUGE"] = 0.10,
 		["BIG"] = 0.3,
-		["SMALL"] = 1
+		["SMALL"] = 0.7,
+		["HEALTH"] = 0.4
 	}
 }
 
@@ -82,5 +84,6 @@ UNITDATA = {
 	["SMALL"] = {
 		["WIDTH"] = 1,
 		["HEIGHT"] = 1
-	}
+	},
+	["HEALTH"] = "dummy"
 }

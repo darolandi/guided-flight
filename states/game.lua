@@ -132,15 +132,22 @@ local function spawnLogic()
 
 	-- ORDER/PRIORITY MATTERS
 	if math.random() <= SPAWNDATA.SPAWN_CHANCE.BIGWALL then
-		EntityManager.createEnemy("BIGWALL", player.x + horizontalBuffer, player.y + verticalBuffer)
+		EntityManager.createUnit("BIGWALL", player.x + horizontalBuffer, player.y + verticalBuffer)
+
 	elseif math.random() <= SPAWNDATA.SPAWN_CHANCE.WALL then
-		EntityManager.createEnemy("WALL", player.x + horizontalBuffer, player.y + verticalBuffer)
+		EntityManager.createUnit("WALL", player.x + horizontalBuffer, player.y + verticalBuffer)
+
 	elseif math.random() <= SPAWNDATA.SPAWN_CHANCE.HUGE then
-		EntityManager.createEnemy("HUGE", player.x + horizontalBuffer, player.y + verticalBuffer)
+		EntityManager.createUnit("HUGE", player.x + horizontalBuffer, player.y + verticalBuffer)
+
 	elseif math.random() <= SPAWNDATA.SPAWN_CHANCE.BIG then
-		EntityManager.createEnemy("BIG", player.x + horizontalBuffer, player.y + verticalBuffer)
+		EntityManager.createUnit("BIG", player.x + horizontalBuffer, player.y + verticalBuffer)
+
 	elseif math.random() <= SPAWNDATA.SPAWN_CHANCE.SMALL then
-		EntityManager.createEnemy("SMALL", player.x + horizontalBuffer, player.y + verticalBuffer)
+		EntityManager.createUnit("SMALL", player.x + horizontalBuffer, player.y + verticalBuffer)
+
+	elseif math.random() <= SPAWNDATA.SPAWN_CHANCE.HEALTH then
+		EntityManager.createUnit("HEALTH", player.x + horizontalBuffer, player.y + verticalBuffer)
 	end
 end
 
