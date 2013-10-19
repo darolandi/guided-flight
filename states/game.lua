@@ -9,6 +9,11 @@
 local PLAYER_STARTX = 100
 local PLAYER_STARTY = 200
 local BG_COLOR = {66, 255, 255}
+local FONT_IMAGE = ImageManager.getImage("love2d_font")
+local FONT = love.graphics.newImageFont( FONT_IMAGE,
+    " abcdefghijklmnopqrstuvwxyz" ..
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ0" ..
+    "123456789.,!?-+/():;%&`'*#=[]\"")
 
 local player = nil
 local score = 0
@@ -84,6 +89,7 @@ function load(args)
 	-- TODO
 	-- load parameters and stuff
 	love.graphics.setBackgroundColor(BG_COLOR)
+	love.graphics.setFont(FONT)
 
 	local args = {
 		["x"] = PLAYER_STARTX,
@@ -419,7 +425,7 @@ local function healthBar()
 
 	for i = HEALTHBAR_INCREMENT, INIT_HEALTH, HEALTHBAR_INCREMENT do
 		if i <= player.health then
-			health = health .. "|"
+			health = health .. "#"
 		else
 			health = health .. " "
 		end
