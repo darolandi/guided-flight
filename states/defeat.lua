@@ -19,7 +19,6 @@ end
 
 function love.draw()
 	love.graphics.setColor(255, 0, 0)
-	love.graphics.setNewFont(40)
 	love.graphics.print("Score: " .. round(finalScore, 0), 100, 150, 0, 1, 1)
 
 	love.graphics.setColor(255, 255, 255)
